@@ -1,0 +1,42 @@
+services:
+  # El backend de Resplandor
+  app-resplandor:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: resplandor-backend
+    ports:
+      - "127.0.0.1:8081:5000"  # el puerto 8081 solo queda abierto para el operaciones dentro del mismo droplet.. && El backend escucha en el 5000-
+    env_file:
+      - .env
+    depends_on:
+      db-resplandor:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - resplandor-network
+
+  # La base de datos de Resplandor
+  db-resplandor:
+    image: postgres:15-alpine
+    container_name: resplandor-db
+    environment:
+      - POSTGRES_PASSWORD=root
+      - POSTGRES_DB=resplandor_db
+    volumes:
+      - resplandor_data:/var/lib/postgresql/data
+    restart: unless-stopped
+    networks:
+      - resplandor-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+networks:
+  resplandor-network:
+    driver: bridge
+
+volumes:
+  resplandor_data:
