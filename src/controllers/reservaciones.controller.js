@@ -80,8 +80,8 @@ const reservacionesController = {
       res.status(200).json({
         success: true,
         message: '✅ Endpoint de desarrollo - Todas las reservaciones',
+        count: reservaciones.length,
         data: reservaciones,
-        count: reservaciones.length
       });
     } catch (error) {
       next(error);

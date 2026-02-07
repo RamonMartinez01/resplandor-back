@@ -2,7 +2,7 @@ const { Cabana } = require('../models');
 const ApiError = require('../utils/apiError');
 
 const cabanasController = {
-  // Obtener todas las cabañas (ahora son globales, no por usuario)
+  // Obtener todas las cabañas (son globales, no por usuario)
   async getAll(req, res, next) {
     try {
       const cabanas = await Cabana.findAll({
@@ -11,8 +11,9 @@ const cabanasController = {
 
       res.status(200).json({
         success: true,
+        count: cabanas.length,
         data: cabanas,
-        count: cabanas.length
+        
       });
     } catch (error) {
       next(error);
@@ -124,8 +125,9 @@ const cabanasController = {
       res.status(200).json({
         success: true,
         message: '✅ Endpoint de desarrollo - Todas las cabañas',
+        count: cabanas.length,
         data: cabanas,
-        count: cabanas.length
+        
       });
     } catch (error) {
       next(error);
