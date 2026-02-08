@@ -6,7 +6,7 @@ const cabanasController = {
   async getAll(req, res, next) {
     try {
       const cabanas = await Cabana.findAll({
-        order: [['nombre', 'ASC']]
+        order: [['id', 'ASC']]
       });
 
       res.status(200).json({

@@ -9,13 +9,13 @@ cabanasRouter.use(authenticate);
 
 // Rutas principales de cabañas
 cabanasRouter.route('/')
-  .get(cabanasController.getAll)     // GET /api/cabanas - Mis cabañas
-  .post(cabanasController.create);   // POST /api/cabanas - Crear cabaña
+  .get(cabanasController.getAll)     // GET /api-resplandor/cabanas - Mis cabañas
+  .post(cabanasController.create);   // POST /api-resplandor/cabanas - Crear cabaña
 
 cabanasRouter.route('/:id')
-  .get(cabanasController.getOne)     // GET /api/cabanas/:id - Una cabaña
-  .put(cabanasController.update)     // PUT /api/cabanas/:id - Actualizar
-  .delete(cabanasController.remove); // DELETE /api/cabanas/:id - Desactivar
+  .get(cabanasController.getOne)     // GET /api-resplandor/cabanas/:id - Una cabaña
+  .put(cabanasController.update)     // PUT /api-resplandor/cabanas/:id - Actualizar
+  .delete(cabanasController.remove); // DELETE /api-resplandor/cabanas/:id - Desactivar
 
 // Ruta de desarrollo para ver todas las cabañas (sin autenticación)
 // Esta ruta debe estar antes del middleware de autenticación

@@ -95,7 +95,7 @@ Cabana.init(
       allowNull: false,
       defaultValue: true
     }
-    // NOTA: usuario_id ha sido eliminado
+    // NOTA: usuario_id ha sido eliminado, porque no hay necesidad de relacionar cabañas con usuarios
   },
   {
     sequelize,
@@ -115,12 +115,8 @@ Cabana.init(
       porTipo: (tipo) => ({
         where: { tipo }
       })
-      // NOTA: Se eliminó el scope 'porUsuario'..
     }
   }
 );
-
-// NOTA: También debemos eliminar la asociación con Usuario en el método associate
-// Si hay un método associate, hay que quitarlo o comentarlo
 
 module.exports = Cabana;
