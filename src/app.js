@@ -1,143 +1,83 @@
 /**
- * Configuración principal de la aplicación Express.
- * Este archivo configura todos los middlewares, rutas base y manejo de errores.
+ * Configuración principal de la aplicación Express
+ * Responsable de:
+ * 1.- Configurar middlewares (CORS, JSON Parser)
+ * 2.- Definir las rutas principales
+ * 3.- Manejar errores globales
  */
 
 const express = require('express');
 const cors = require('cors');
-const helmet = require('helmet');
-const morgan = require('morgan');
-const { sequelize } = require('./config/database');
-require('dotenv').config();
-const Usuario = require('./models/usuario');
 
-// Importar utilities y clases de error
-const ApiError = require('./utils/apiError');
-const { errorConverter, errorHandler } = require('./middleware/error.middleware');
-
-// Inicializar la aplicación Express
 const app = express();
 
-// Importar rutas
-const routes = require('./routes');
+// ===================================================================
+// 1. MIDDLEWARES GLOBALES
+// ===================================================================
 
-
-// ============================================================================
-// 1. MIDDLEWARES DE SEGURIDAD Y LOGGING
-// ============================================================================
-
-// Helmet: Seguridad HTTP headers
-app.use(helmet());
-
-// Morgan: Logging de solicitudes HTTP
-app.use(morgan(process.env.NODE_ENV === 'production' ? 'combined' : 'dev'));
-
-// CORS (Cross-Origin Resource Sharing)
+// Configuración de CORS - ¡Crucial para que Vite pueda consumir la API!
 const corsOptions = {
-  origin: process.env.FRONTEND_URL || 'http://localhost:3000',
-  credentials: true,
-  optionsSuccessStatus: 200
+  origin: [
+    'http://localhost:5173', 
+    // 'https://dominio-produccion.com' 
+  ],
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  allowedHeaders: ['Content-Type', 'Authorization']
 };
+
 app.use(cors(corsOptions));
 
-// ============================================================================
-// 2. MIDDLEWARES DE PARSING
-// ============================================================================
+// Parsea los cuerpos de las peticiones HTTP que vienen en formato JSON
+app.use(express.json());
+// Parsea datos enviados desde formularios tradicionales (por si acaso)
+app.use(express.urlencoded({ extended: true }));
 
-app.use(express.json({
-  limit: '10mb'
-}));
+// ===================================================================
+// 2. RUTAS BASE Y DE SALUD (Health checks)
+// ===================================================================
 
-app.use(express.urlencoded({
-  extended: true,
-  limit: '10mb'
-}));
-
-// ============================================================================
-// 3. RUTAS DE LA API
-// ============================================================================
-
-// Health check
-app.get('/health', async (req, res) => {
-  try {
-    await sequelize.authenticate();
-    
-    res.status(200).json({
-      status: 'healthy',
-      timestamp: new Date().toISOString(),
-      database: 'connected',
-      environment: process.env.NODE_ENV || 'development'
-    });
-  } catch (error) {
-    res.status(503).json({
-      status: 'unhealthy',
-      timestamp: new Date().toISOString(),
-      database: 'disconnected',
-      error: error.message,
-      environment: process.env.NODE_ENV || 'development'
-    });
-  }
-});
-
-// Ruta de bienvenida
+// Ruta de bienvenida requerida por tu index.js
 app.get('/', (req, res) => {
   res.json({
-    message: 'Bienvenido a la API de Resplandor - Sistema de Gestión de Cabañas',
-    version: '1.0.0',
-    documentation: 'En construcción',
-    endpoints: {
-      health: '/health',
-      huespedes: '/api-resplandor/huespedes',
-      cabanas: '/api-resplandor/cabanas',
-      reservaciones: '/api-resplandor/reservaciones',
-      checklist: '/api-resplandor/checklist'
-    }
+    message: 'Bienvenido a la API de Resplandor (Headless CMS)',
+    version: '1.0.0'
   });
 });
 
-// Y en una ruta de prueba (solo desarrollo):
-if (process.env.NODE_ENV === 'development') {
-  app.get('/api/dev/test-model', async (req, res) => {
-    try {
-      const count = await Usuario.count();
-      res.json({
-        success: true,
-        message: 'Modelo Usuario cargado correctamente',
-        usuarios_registrados: count
-      });
-    } catch (error) {
-      res.status(500).json({
-        success: false,
-        message: 'Error cargando modelo',
-        error: error.message
-      });
-    }
-  });
-}
+// Ruta de health check requerida por tu index.js
+app.get('/health', (req, res) => {
+  res.status(200).json({ status: 'OK', timestamp: new Date() });
+});
 
-// ============================================================================
-// 4. RUTAS PRINCIPALES (Placeholder por ahora)
-// ============================================================================
+// ===================================================================
+// 3. RUTAS DE LA API (El núcleo del CMS)
+// ===================================================================
 
-app.use('/api-resplandor', routes)
+// Aquí conectaremos nuestro controlador de contenido más adelante.
+// Por ahora, dejamos un "placeholder" o mock para comprobar que la ruta funciona.
+app.use('/api-resplandor/content', (req, res) => {
+  res.json({ message: 'Ruta de contenido lista para ser implementada.' });
+});
 
-// ============================================================================
-// 5. MANEJO DE ERRORES
-// ============================================================================
+// ===================================================================
+// 4. MANEJO DE ERRORES (Fallbacks)
+// ===================================================================
 
-// Middleware para rutas no encontradas (404)
+// Manejador para rutas no encontradas (404)
 app.use((req, res, next) => {
-  next(new ApiError(404, `Ruta no encontrada: ${req.method} ${req.originalUrl}`));
+  res.status(404).json({
+    error: 'Not Found',
+    message: `La ruta ${req.originalUrl} no existe en este servidor.`
+  });
 });
 
-// Convertir errores de Express a ApiError
-app.use(errorConverter);
-
-// Manejador final de errores
-app.use(errorHandler);
-
-// ============================================================================
-// 6. EXPORTACIÓN
-// ============================================================================
+// Manejador de errores globales (500)
+app.use((err, req, res, next) => {
+  console.error('❌ Error capturado en el middleware global:', err);
+  res.status(500).json({
+    error: 'Internal Server Error',
+    message: process.env.NODE_ENV === 'development' ? err.message : 'Algo salió mal en el servidor.'
+  });
+});
 
 module.exports = app;
