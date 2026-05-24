@@ -1,33 +1,33 @@
 services:
-  # El backend de Resplandor
-  app-resplandor:
+  # El backend del Portfolio CMS
+  app-portfolio:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: resplandor-backend
+    container_name: portfolio-backend
     ports:
-      - "127.0.0.1:8081:5000"  # el puerto 8081 solo queda abierto para el operaciones dentro del mismo droplet.. && El backend escucha en el 5000-
+      - "127.0.0.1:8081:5000"
     env_file:
       - .env
     depends_on:
-      db-resplandor:
+      db-portfolio:
         condition: service_healthy
     restart: unless-stopped
     networks:
-      - resplandor-network
+      - portfolio-network
 
-  # La base de datos de Resplandor
-  db-resplandor:
+  # La nueva base de datos limpia
+  db-portfolio:
     image: postgres:15-alpine
-    container_name: resplandor-db
+    container_name: portfolio-db
     environment:
       - POSTGRES_PASSWORD=root
-      - POSTGRES_DB=resplandor_db
+      - POSTGRES_DB=portfolio_db
     volumes:
-      - resplandor_data:/var/lib/postgresql/data
+      - portfolio_data:/var/lib/postgresql/data
     restart: unless-stopped
     networks:
-      - resplandor-network
+      - portfolio-network
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 10s
@@ -35,8 +35,8 @@ services:
       retries: 5
 
 networks:
-  resplandor-network:
+  portfolio-network:
     driver: bridge
 
 volumes:
-  resplandor_data:
+  portfolio_data:
