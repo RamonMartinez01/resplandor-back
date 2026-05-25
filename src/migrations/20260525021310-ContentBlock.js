@@ -2,8 +2,8 @@
 
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
-  async up (queryInterface, Sequelize) {
-   await queryInterface.createTable('content_blocks', {
+  async up(queryInterface, Sequelize) {
+    await queryInterface.createTable('content_blocks', {
       id: {
         allowNull: false,
         primaryKey: true,
@@ -23,28 +23,28 @@ module.exports = {
         allowNull: false,
         defaultValue: {},
       },
-      isActive: {
+      is_active: {
         type: Sequelize.BOOLEAN,
         defaultValue: true,
       },
-      createdAt: {
+      created_at: {
         allowNull: false,
         type: Sequelize.DATE,
       },
-      updatedAt: {
+      updated_at: {
         allowNull: false,
         type: Sequelize.DATE,
       }
     });
 
-    // Añadimos el índice compuesto único que definimos en el modelo
+    // Índice compuesto
     await queryInterface.addIndex('content_blocks', ['section', 'locale'], {
       unique: true,
       name: 'content_blocks_section_locale_unique'
     });
   },
 
-  async down (queryInterface, Sequelize) {
+  async down(queryInterface, Sequelize) {
     await queryInterface.dropTable('content_blocks');
   }
 };

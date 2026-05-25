@@ -40,6 +40,7 @@ ContentBlock.init({
   isActive: {
     type: DataTypes.BOOLEAN,
     defaultValue: true,
+    field: 'is_active', // Mapeo explícito a snake_case
   }
 }, {
   sequelize, // The magic word
