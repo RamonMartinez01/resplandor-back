@@ -38,32 +38,39 @@ Project.init({
   imageUrl: {
     type: DataTypes.STRING,
     allowNull: true,
+    field: 'image_url',
   },
   githubUrl: {
     type: DataTypes.STRING,
     allowNull: true,
+    field: 'github_url',
   },
   liveDemoUrl: {
     type: DataTypes.STRING,
     allowNull: true,
+    field: 'live_demo_url',
   },
   isFeatured: {
     type: DataTypes.BOOLEAN,
     defaultValue: false,
+    field: 'is_featured',
   },
   localizedContent: {
     type: DataTypes.JSONB,
     allowNull: false,
     defaultValue: {},
     comment: "Datos flexibles y multi-idioma. Ej: { es: { description: '...' }, en: { description: '...' } }",
+    field: 'localized_content',
   },
   isActive: {
     type: DataTypes.BOOLEAN,
     defaultValue: true,
+    field: 'is_active', // Mapeo explícito a snake_case
   }
 }, {
   sequelize,
   tableName: 'projects',
+  underscored: true,
   timestamps: true,
 });
 
