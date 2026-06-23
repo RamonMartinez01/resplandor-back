@@ -1,17 +1,16 @@
+// src/routes/index.js
 const express = require('express');
 
 const router = express.Router();
 
-// Rutas de autenticación
 
+// 1. Importar los enrutadores individuales
+const contentRoutes = require('./contentRoutes');
+const projectRoutes = require('./projectRoutes'); 
 
-// Ruta de desarrollo para ver todas las cabañas (sin autenticación)
-if (process.env.NODE_ENV === 'development') {
-}
-
-// Rutas de perfil (protegidas)
-
-// Ruta base de API
+// 2. Conectar las rutas a sus respectivos endpoints
+router.use('/content', contentRoutes);
+router.use('/projects', projectRoutes); 
 
 
 module.exports = router;

@@ -9,6 +9,9 @@
 const express = require('express');
 const cors = require('cors');
 
+// Importamos el enrutador centralizado
+const apiRoutes = require('./routes');
+
 const app = express();
 
 // ===================================================================
@@ -53,11 +56,9 @@ app.get('/health', (req, res) => {
 // 3. RUTAS DE LA API (El núcleo del CMS)
 // ===================================================================
 
-// Aquí conectaremos nuestro controlador de contenido más adelante.
-// Por ahora, dejamos un "placeholder" o mock para comprobar que la ruta funciona.
-app.use('/api-resplandor/content', (req, res) => {
-  res.json({ message: 'Ruta de contenido lista para ser implementada.' });
-});
+// Conectamos el enrutador central.
+// Toda petición que empiece con '/api-resplandor' entrará a routes/index.js
+app.use('/api-resplandor', apiRoutes);
 
 // ===================================================================
 // 4. MANEJO DE ERRORES (Fallbacks)
@@ -71,12 +72,19 @@ app.use((req, res, next) => {
   });
 });
 
-// Manejador de errores globales (500)
+// Manejador de errores globales dinámico
 app.use((err, req, res, next) => {
-  console.error('❌ Error capturado en el middleware global:', err);
-  res.status(500).json({
-    error: 'Internal Server Error',
-    message: process.env.NODE_ENV === 'development' ? err.message : 'Algo salió mal en el servidor.'
+  // Leemos el código de nuestro ApiError, o usamos 500 por defecto si es un bug grave
+  const statusCode = err.statusCode || 500;
+  const statusType = err.status || 'error';
+
+  console.error(`[Error] ${statusCode} - ${err.message}`);
+
+  res.status(statusCode).json({
+    status: statusType,
+    message: err.message,
+    // Opcional: mostrar el stack trace solo en desarrollo
+    stack: process.env.NODE_ENV === 'development' ? err.stack : undefined
   });
 });
 

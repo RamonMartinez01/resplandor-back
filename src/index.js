@@ -7,7 +7,8 @@
  */
 
 const app = require('./app');
-const { sequelize, testConnection } = require('./config/database');
+const db = require('./models'); 
+const { testConnection } = require('./config/database');
 require('dotenv').config();
 
 // ===================================================================
