@@ -10,29 +10,26 @@ const ProjectController = {
      */
     async getAllProjects(req, res, next) {
         try {
-            // 1. Capturamos el idioma de la URL. Por defecto será 'es' si no se envía.
-            const locale = req.query.locale || 'es';
+            // 1. Captura el idioma de la URL. Por defecto será 'en' si no se envía.
+            const locale = req.query.locale || 'en';
 
-            // 2. Buscamos todos los proyectos activos
+            // 2. Busca todos los proyectos activos
             const projects = await Project.findAll({
                 where: { isActive: true },
-                order: [['createdAt', 'DESC']] // Ordenamos: los más recientes primero
+                order: [['createdAt', 'DESC']] // Ordena: los más recientes primero
             });
 
-            if (!projects || projects.length === 0) {
-                return next(new ApiError(404, 'No se encontraron proyectos activos.'));
-            }
-
-            // 3. Data Shaping: Transformamos el array para el frontend
+            // 3. Data Shaping: Transforma el array para el frontend
+            // Si projects es [], formattedProjects simplemente será []
             const formattedProjects = projects.map(project => {
-                // Intentamos sacar el contenido en el idioma pedido, si no existe, usamos español, si no, vacío
-                const localData = project.localizedContent[locale] || project.localizedContent['es'] || {};
+                // Intenta sacar el contenido en el idioma pedido, si no existe, usamos inglés, si no, vacío
+                const localData = project.localizedContent[locale] || project.localizedContent['en'] || {};
                 
                 return {
                     id: project.id,
                     title: project.title,
                     slug: project.slug,
-                    description: localData.description || '', // Extraemos la descripción plana
+                    description: localData.description || '', // Extrae la descripción plana
                     tags: project.tags,
                     imageUrl: project.imageUrl,
                     githubUrl: project.githubUrl,
@@ -41,7 +38,7 @@ const ProjectController = {
                 };
             });
 
-            // 4. Respuesta exitosa
+            // 4. Respuesta exitosa (maneja colecciones con valores, o vacías)
             return res.status(200).json({
                 status: 'success',
                 results: formattedProjects.length,
