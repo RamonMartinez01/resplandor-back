@@ -169,7 +169,31 @@ const ContentBlockController = {
             console.error(`❌ Error en deleteBlock (${req.params.id}):`, error);
             next(error);
         }
-    }
+    },
+
+    /**
+     * Obtiene todos los registros en bruto (Para uso de CMS/Admin).
+     * GET /api-resplandor/content
+     */
+    async getAllBlocks(req, res, next) {
+        try {
+            const blocks = await ContentBlock.findAll({
+                order: [
+                    ['locale', 'ASC'],
+                    ['section', 'ASC'] // Ordenamos alfabéticamente para que sea fácil leer en Postman
+                ]
+            });
+
+            return res.status(200).json({
+                status: 'success',
+                results: blocks.length,
+                data: blocks
+            });
+        } catch (error) {
+            console.error('❌ Error en getAllBlocks:', error);
+            next(error);
+        }
+    },
 };
 
 module.exports = ContentBlockController;
