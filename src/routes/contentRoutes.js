@@ -21,6 +21,13 @@ router.get('/:locale', ContentBlockController.getDictionaryByLocale);
 router.post('/', ContentBlockController.createBlock);
 
 /**
+ * @route   GET /api-resplandor/content/
+ * @desc Obtiene todos los registros en bruto (Para uso de CMS/Admin).
+ * @access Public
+ */
+router.get('/', ContentBlockController.getAllBlocks);
+
+/**
  * @route   PATCH /api-resplandor/content/:id
  * @desc    Actualiza parcialmente un bloque (incluyendo fusión de JSONB)
  * @access  Public (Temporalmente)
