@@ -1,3 +1,4 @@
+// src/config/sequelize.config.js
 require('dotenv').config();
 
 module.exports = {
