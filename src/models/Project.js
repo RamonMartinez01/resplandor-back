@@ -1,3 +1,4 @@
+// src/models/Project.js  
 const { Model, DataTypes } = require('sequelize');
 
 // Exports the function that recieve the conection
@@ -40,10 +41,11 @@ Project.init({
     allowNull: true,
     field: 'image_url',
   },
-  githubUrl: {
-    type: DataTypes.STRING,
-    allowNull: true,
-    field: 'github_url',
+  repositories: {
+    type: DataTypes.JSONB,
+    allowNull: false,
+    defaultValue: [],
+    comment: "Array de repositorios. Ej: [{ label: 'Frontend', url: '...' }]"
   },
   liveDemoUrl: {
     type: DataTypes.STRING,

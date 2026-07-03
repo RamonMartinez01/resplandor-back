@@ -1,3 +1,4 @@
+// src/controllers/Project.Controller.js
 const db = require('../models');
 const ApiError = require('../utils/apiError');
 const Project = db.Project;
@@ -24,15 +25,15 @@ const ProjectController = {
             const formattedProjects = projects.map(project => {
                 // Intenta sacar el contenido en el idioma pedido, si no existe, usamos inglés, si no, vacío
                 const localData = project.localizedContent[locale] || project.localizedContent['en'] || {};
-                
+
                 return {
                     id: project.id,
                     title: project.title,
                     slug: project.slug,
-                    description: localData.description || '', // Extrae la descripción plana
+                    description: localData.description || '', 
                     tags: project.tags,
                     imageUrl: project.imageUrl,
-                    githubUrl: project.githubUrl,
+                    repositories: project.repositories,
                     liveDemoUrl: project.liveDemoUrl,
                     isFeatured: project.isFeatured
                 };
@@ -57,14 +58,18 @@ const ProjectController = {
      */
     async createProject(req, res, next) {
         try {
-            const { 
-                title, slug, tags, imageUrl, githubUrl, 
-                liveDemoUrl, isFeatured, localizedContent, isActive 
+            const {
+                title, slug, tags, imageUrl, repositories,
+                liveDemoUrl, isFeatured, localizedContent, isActive
             } = req.body;
 
             // 1. Validación de campos críticos
             if (!title || !slug || !localizedContent) {
                 return next(new ApiError(400, 'Los campos title, slug y localizedContent son obligatorios.'));
+            }
+
+            if (repositories && !Array.isArray(repositories)) {
+                return next(new ApiError(400, "El campo 'repositories' debe ser un arreglo de objetos."));
             }
 
             // 2. Creación del registro
@@ -73,7 +78,7 @@ const ProjectController = {
                 slug,
                 tags,
                 imageUrl,
-                githubUrl,
+                repositories,
                 liveDemoUrl,
                 isFeatured: isFeatured || false,
                 localizedContent,
@@ -91,7 +96,7 @@ const ProjectController = {
             if (error.name === 'SequelizeUniqueConstraintError') {
                 return next(new ApiError(409, `Conflicto: El slug '${req.body.slug}' ya está en uso por otro proyecto.`));
             }
-            
+
             console.error('❌ Error en createProject:', error);
             next(error);
         }
@@ -120,6 +125,24 @@ const ProjectController = {
                     ...project.localizedContent,
                     ...updates.localizedContent
                 };
+            }
+
+            const allowedUpdates = [
+                'title', 'slug', 'tags', 'imageUrl',
+                'repositories',
+                'liveDemoUrl', 'isFeatured', 'localizedContent', 'isActive'
+            ];
+
+            Object.keys(req.body).forEach((key) => {
+                if (allowedUpdates.includes(key)) {
+                    updates[key] = req.body[key];
+                }
+            });
+
+            
+            // Y validamos igual antes de hacer el update
+            if (updates.repositories && !Array.isArray(updates.repositories)) {
+                return next(new ApiError(400, "El campo 'repositories' debe ser un arreglo de objetos."));
             }
 
             // 3. Ejecutamos la actualización
