@@ -15,6 +15,13 @@ const requireApiKey = require('../middlewares/requireApiKey');
 router.get('/', ProjectController.getAllProjects);
 
 /**
+ * @route   GET /api-resplandor/projects/:identifier?locale=es
+ * @desc    Obtiene un proyecto específico por su ID o Slug.
+ * @access  Public  
+ */
+router.get('/:id', ProjectController.getProjectByIdOrSlug);
+
+/**
  * @route   POST /api-resplandor/projects
  * @desc    Crea un nuevo proyecto
  * @access  Public (Temporalmente)

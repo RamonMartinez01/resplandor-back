@@ -53,6 +53,67 @@ const ProjectController = {
     },
 
     /**
+     * Obtiene un proyecto específico por su ID o Slug.
+     * Extrae el contenido localizado (description, architecture, devops, etc.)
+     * GET /api-resplandor/projects/:identifier?locale=es
+     */
+    async getProjectByIdOrSlug(req, res, next) {
+        try {
+            const { id } = req.params; // Usamos 'id' asumiendo que tu ruta es /:id, pero internamente actuará como 'identifier'
+            const locale = req.query.locale || 'en';
+
+            // 1. Expresión regular para detectar si el parámetro es un UUIDv4
+            const isUUID = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$/.test(id);
+
+            // 2. Construimos la condición de búsqueda dinámicamente
+            const searchCondition = isUUID ? { id: id } : { slug: id };
+            
+            // Añadimos la regla de negocio: el proyecto debe estar activo
+            searchCondition.isActive = true;
+
+            // 3. Ejecutamos la consulta
+            const project = await Project.findOne({
+                where: searchCondition
+            });
+
+            // 4. Manejo de error si no existe
+            if (!project) {
+                return next(new ApiError(404, `No se encontró el proyecto activo con identificador: ${id}`));
+            }
+
+            // 5. Data Shaping: Extraemos el contenido en el idioma solicitado
+            // ¡Aquí brilla tu campo JSONB!
+            const localData = project.localizedContent[locale] || project.localizedContent['en'] || {};
+
+            const formattedProject = {
+                id: project.id,
+                title: project.title,
+                slug: project.slug,
+                // Mapeamos los campos que vivirán dentro del JSONB
+                description: localData.description || '',
+                architecture: localData.architecture || '', 
+                devops: localData.devops || '',             
+                tags: project.tags,
+                imageUrl: project.imageUrl,
+                repositories: project.repositories,
+                liveDemoUrl: project.liveDemoUrl,
+                isFeatured: project.isFeatured
+                // No enviamos isActive ni localizedContent crudo por seguridad/limpieza
+            };
+
+            // 6. Respuesta exitosa
+            return res.status(200).json({
+                status: 'success',
+                data: formattedProject
+            });
+
+        } catch (error) {
+            console.error(`❌ Error en getProjectByIdOrSlug (${req.params.id}):`, error);
+            next(error);
+        }
+    },
+
+    /**
      * Crea un nuevo proyecto en la base de datos.
      * POST /api-resplandor/projects
      */
