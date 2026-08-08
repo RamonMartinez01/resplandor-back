@@ -92,6 +92,7 @@ const ProjectController = {
                 // Mapeamos los campos que vivirán dentro del JSONB
                 description: localData.description || '',
                 architecture: localData.architecture || '', 
+                mermaidDiagram: localData.mermaidDiagram || '',
                 devops: localData.devops || '',             
                 tags: project.tags,
                 imageUrl: project.imageUrl,
