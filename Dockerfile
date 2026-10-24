@@ -1,5 +1,5 @@
 # Usamos una versión ligera de Node.js
-FROM node:18-alpine
+FROM node:22.23.4-alpine
 
 # Instalamos curl para el healthcheck
 RUN apk add --no-cache curl
